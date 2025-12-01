@@ -1,0 +1,65 @@
+# .gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Data directories
+data/
+*.db
+*.db-journal
+
+# Logs
+*.log
+logs/
+
+# Config (keep example)
+config/config.yaml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+.npm
+*.tgz
+
+# Build
+dist/
+build/
+
+# Environment
+.env
+.env.local
+
+# Temporary
+*.tmp
+*.temp
+.cache/
+
+# Model files
+*.bin
+*.onnx
+models/
+
+# Index files
+*.index
+*.pkl
+indexes/
