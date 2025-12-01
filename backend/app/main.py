@@ -113,13 +113,15 @@ async def health_check():
 
 
 # ============================================================================
-# API Routers (to be implemented)
+# API Routers
 # ============================================================================
 
-# TODO: Import and include routers
-# from app.api import ingest, query, system
-# app.include_router(ingest.router, prefix="/api", tags=["ingestion"])
-# app.include_router(query.router, prefix="/api", tags=["query"])
+from app.api import ingest, query
+app.include_router(ingest.router, prefix="/api", tags=["ingestion"])
+app.include_router(query.router, prefix="/api", tags=["query"])
+
+# TODO: Import and include other routers
+# from app.api import system
 # app.include_router(system.router, prefix="/api", tags=["system"])
 
 
