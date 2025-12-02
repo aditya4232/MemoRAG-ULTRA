@@ -36,6 +36,7 @@ export function Sidebar() {
                                 src="/icon.png"
                                 alt="CodeGenesis Logo"
                                 fill
+                                sizes="32px"
                                 className="object-contain"
                             />
                         </div>

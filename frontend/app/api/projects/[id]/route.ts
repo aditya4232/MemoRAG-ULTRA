@@ -114,24 +114,48 @@ export async function DELETE(
     try {
         const { userId } = await auth();
         if (!userId) {
+            console.log('DELETE /api/projects/[id]: Unauthorized');
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const { id } = await params;
+        console.log(`DELETE /api/projects/${id}: Request from user ${userId}`);
 
         // Verify ownership
         const { data: existingProject, error: fetchError } = await supabaseAdmin
             .from('projects')
-            .select('user_id')
+            .select('user_id, name')
             .eq('id', id)
             .single();
 
-        if (fetchError || !existingProject) {
+        if (fetchError) {
+            console.error(`DELETE /api/projects/${id}: Fetch error:`, fetchError);
+            return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+        }
+
+        if (!existingProject) {
+            console.log(`DELETE /api/projects/${id}: Project not found`);
             return NextResponse.json({ error: 'Project not found' }, { status: 404 });
         }
 
         if (existingProject.user_id !== userId) {
+            console.log(`DELETE /api/projects/${id}: Forbidden (Owner: ${existingProject.user_id}, Requester: ${userId})`);
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
+
+        console.log(`DELETE /api/projects/${id}: Deleting project "${existingProject.name}"`);
+
+        // Delete generations first (even though CASCADE should handle it)
+        const { error: generationsDeleteError } = await supabaseAdmin
+            .from('generations')
+            .delete()
+            .eq('project_id', id);
+
+        if (generationsDeleteError) {
+            console.error(`DELETE /api/projects/${id}: Error deleting generations:`, generationsDeleteError);
+            // Continue anyway, CASCADE should handle it
+        } else {
+            console.log(`DELETE /api/projects/${id}: Deleted associated generations`);
         }
 
         // Delete project
@@ -141,12 +165,20 @@ export async function DELETE(
             .eq('id', id);
 
         if (deleteError) {
-            return NextResponse.json({ error: deleteError.message }, { status: 500 });
+            console.error(`DELETE /api/projects/${id}: Delete error:`, deleteError);
+            return NextResponse.json({
+                error: 'Failed to delete project',
+                details: deleteError.message
+            }, { status: 500 });
         }
 
-        return NextResponse.json({ success: true });
-    } catch (error) {
-        console.error('Internal error:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        console.log(`DELETE /api/projects/${id}: Successfully deleted`);
+        return NextResponse.json({ success: true, message: 'Project deleted successfully' });
+    } catch (error: any) {
+        console.error('DELETE /api/projects/[id]: Internal error:', error);
+        return NextResponse.json({
+            error: 'Internal Server Error',
+            details: error.message
+        }, { status: 500 });
     }
 }

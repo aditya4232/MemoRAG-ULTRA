@@ -2,15 +2,30 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { Search, Filter, Plus, FolderGit2, MoreVertical, Github, Globe } from "lucide-react"
+import { Search, Filter, Plus, FolderGit2, MoreVertical, Github, Globe, Trash2, Edit2, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { getUserProjects, Project } from "@/lib/supabase"
+import { getUserProjects, Project, deleteProject, updateProject } from "@/lib/supabase"
 import { useUser } from "@clerk/nextjs"
 import Link from "next/link"
 import { toast } from "sonner"
 import { NewProjectModal } from "@/components/modals/new-project-modal"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
 
 export default function ProjectsPage() {
     const { user } = useUser()
@@ -18,6 +33,17 @@ export default function ProjectsPage() {
     const [isLoading, setIsLoading] = useState(true)
     const [searchQuery, setSearchQuery] = useState("")
     const [isNewProjectOpen, setIsNewProjectOpen] = useState(false)
+
+    // Rename state
+    const [isRenameOpen, setIsRenameOpen] = useState(false)
+    const [projectToRename, setProjectToRename] = useState<Project | null>(null)
+    const [newName, setNewName] = useState("")
+    const [isRenaming, setIsRenaming] = useState(false)
+
+    // Delete state
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+    const [projectToDelete, setProjectToDelete] = useState<Project | null>(null)
+    const [isDeleting, setIsDeleting] = useState(false)
 
     useEffect(() => {
         async function fetchProjects() {
@@ -33,6 +59,58 @@ export default function ProjectsPage() {
         }
         fetchProjects()
     }, [user])
+
+    const handleRename = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!projectToRename || !newName.trim()) return
+
+        setIsRenaming(true)
+        try {
+            const updated = await updateProject(projectToRename.id, { name: newName })
+            if (updated) {
+                setProjects(projects.map(p => p.id === updated.id ? updated : p))
+                toast.success("Project renamed")
+                setIsRenameOpen(false)
+            } else {
+                throw new Error("Failed to rename")
+            }
+        } catch (error) {
+            toast.error("Failed to rename project")
+        } finally {
+            setIsRenaming(false)
+        }
+    }
+
+    const handleDelete = async () => {
+        if (!projectToDelete) return
+
+        setIsDeleting(true)
+        try {
+            await deleteProject(projectToDelete.id)
+            setProjects(projects.filter(p => p.id !== projectToDelete.id))
+            toast.success("Project deleted successfully")
+            setIsDeleteOpen(false)
+            setProjectToDelete(null)
+        } catch (error: any) {
+            console.error('Delete error:', error)
+            toast.error("Failed to delete project", {
+                description: error.message || "An unexpected error occurred"
+            })
+        } finally {
+            setIsDeleting(false)
+        }
+    }
+
+    const openRename = (project: Project) => {
+        setProjectToRename(project)
+        setNewName(project.name)
+        setIsRenameOpen(true)
+    }
+
+    const openDelete = (project: Project) => {
+        setProjectToDelete(project)
+        setIsDeleteOpen(true)
+    }
 
     const filteredProjects = projects.filter(project =>
         project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -95,23 +173,37 @@ export default function ProjectsPage() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.05 }}
                         >
-                            <Link href={`/dashboard/editor?id=${project.id}`} className="block h-full">
-                                <Card className="bg-black/40 border-white/10 hover:border-primary/50 transition-all group h-full flex flex-col">
-                                    <CardHeader>
-                                        <div className="flex justify-between items-start">
-                                            <div className="space-y-1">
-                                                <CardTitle className="text-xl group-hover:text-primary transition-colors">
-                                                    {project.name}
-                                                </CardTitle>
-                                                <CardDescription className="line-clamp-2">
-                                                    {project.description || "No description provided."}
-                                                </CardDescription>
-                                            </div>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2">
-                                                <MoreVertical className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    </CardHeader>
+                            <Card className="bg-black/40 border-white/10 hover:border-primary/50 transition-all group h-full flex flex-col">
+                                <CardHeader>
+                                    <div className="flex justify-between items-start">
+                                        <Link href={`/dashboard/editor?id=${project.id}`} className="flex-1 space-y-1 block">
+                                            <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                                                {project.name}
+                                            </CardTitle>
+                                            <CardDescription className="line-clamp-2">
+                                                {project.description || "No description provided."}
+                                            </CardDescription>
+                                        </Link>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2">
+                                                    <MoreVertical className="h-4 w-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end" className="bg-[#09090b] border-white/10">
+                                                <DropdownMenuItem onClick={() => openRename(project)} className="gap-2 cursor-pointer">
+                                                    <Edit2 className="h-4 w-4" />
+                                                    Rename
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => openDelete(project)} className="gap-2 text-red-500 focus:text-red-500 focus:bg-red-500/10 cursor-pointer">
+                                                    <Trash2 className="h-4 w-4" />
+                                                    Delete
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </div>
+                                </CardHeader>
+                                <Link href={`/dashboard/editor?id=${project.id}`} className="flex-1 flex flex-col">
                                     <CardContent className="flex-1">
                                         <div className="flex flex-wrap gap-2">
                                             {project.tech_stack?.map((tech) => (
@@ -133,13 +225,69 @@ export default function ProjectsPage() {
                                             {project.deployment_url && <Globe className="h-4 w-4 hover:text-white cursor-pointer" />}
                                         </div>
                                     </CardFooter>
-                                </Card>
-                            </Link>
+                                </Link>
+                            </Card>
                         </motion.div>
                     ))}
                 </div>
             )}
             <NewProjectModal open={isNewProjectOpen} onOpenChange={setIsNewProjectOpen} />
+
+            {/* Rename Dialog */}
+            <Dialog open={isRenameOpen} onOpenChange={setIsRenameOpen}>
+                <DialogContent className="bg-[#09090b] border-white/10 text-white">
+                    <DialogHeader>
+                        <DialogTitle>Rename Project</DialogTitle>
+                        <DialogDescription>
+                            Enter a new name for your project.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleRename}>
+                        <div className="grid gap-4 py-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="name">Name</Label>
+                                <Input
+                                    id="name"
+                                    value={newName}
+                                    onChange={(e) => setNewName(e.target.value)}
+                                    className="bg-black/20 border-white/10"
+                                />
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button type="button" variant="ghost" onClick={() => setIsRenameOpen(false)}>Cancel</Button>
+                            <Button type="submit" disabled={isRenaming} className="bg-primary hover:bg-primary/90">
+                                {isRenaming && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Save Changes
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* Delete Dialog */}
+            <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+                <DialogContent className="bg-[#09090b] border-white/10 text-white">
+                    <DialogHeader>
+                        <DialogTitle>Delete Project</DialogTitle>
+                        <DialogDescription>
+                            Are you sure you want to delete "{projectToDelete?.name}"? This action cannot be undone.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button variant="ghost" onClick={() => setIsDeleteOpen(false)}>Cancel</Button>
+                        <Button
+                            variant="destructive"
+                            disabled={isDeleting}
+                            onClick={handleDelete}
+                            className="bg-red-500 hover:bg-red-600"
+                        >
+                            {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Delete Project
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }

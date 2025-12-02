@@ -52,7 +52,7 @@ export function NewProjectModal({ open, onOpenChange }: { open: boolean, onOpenC
                 toast.success("Project created successfully")
                 onOpenChange(false)
                 // Redirect to editor with new project context
-                router.push(`/dashboard/editor?projectId=${project.id}`)
+                router.push(`/dashboard/editor?id=${project.id}`)
             } else {
                 throw new Error("Failed to create project")
             }

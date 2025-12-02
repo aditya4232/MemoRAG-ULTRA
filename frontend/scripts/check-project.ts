@@ -21,14 +21,17 @@ async function checkProject(projectId: string) {
 
     const { data, error } = await supabase
         .from('projects')
-        .select('*')
+        .select('id, user_id, name')
         .eq('id', projectId)
         .single();
 
     if (error) {
         console.error('Error:', error);
     } else {
-        console.log('Project found:', data);
+        console.log('Project found:');
+        console.log(`ID: ${data.id}`);
+        console.log(`User ID: ${data.user_id}`);
+        console.log(`Name: ${data.name}`);
     }
 }
 

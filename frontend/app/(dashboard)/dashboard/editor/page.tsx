@@ -5,11 +5,10 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/componen
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Send, Download, Play, Code2, Eye, Share2, Sparkles, RefreshCw } from "lucide-react"
+import { Send, Download, Play, Code2, Eye, Share2, Sparkles, RefreshCw, Save } from "lucide-react"
 import { toast } from "sonner"
 import { downloadProjectAsZip } from "@/lib/zip-utils"
 import { useSearchParams, useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
 
 interface Message {
     role: 'user' | 'assistant'
@@ -19,7 +18,7 @@ interface Message {
 export default function EditorPage() {
     const searchParams = useSearchParams()
     const router = useRouter()
-    const projectId = searchParams.get("id")
+    const projectId = searchParams.get("id") || searchParams.get("projectId")
 
     const [messages, setMessages] = useState<Message[]>([
         { role: 'assistant', content: 'Hello! I am CodeGenesis. Describe what you want to build, and I will architect and code it for you.' }
@@ -33,20 +32,25 @@ export default function EditorPage() {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Preview</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-      body { background-color: #0f172a; color: white; display: flex; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; }
+      body { background-color: #0f172a; color: white; display: flex; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; margin: 0; }
+      .container { text-align: center; }
+      h1 { font-size: 2.5rem; font-weight: bold; margin-bottom: 1rem; color: #818cf8; }
+      p { color: #94a3b8; }
     </style>
 </head>
 <body>
-    <div class="text-center">
-        <h1 class="text-4xl font-bold mb-4 text-indigo-400">Ready to Build</h1>
-        <p class="text-slate-400">Enter a prompt to start generating your application.</p>
+    <div class="container">
+        <h1>Ready to Build</h1>
+        <p>Enter a prompt to start generating your application.</p>
     </div>
 </body>
 </html>
   `)
+    const [lastSavedCode, setLastSavedCode] = useState(code)
+    const [isSaving, setIsSaving] = useState(false)
     const [activeTab, setActiveTab] = useState<'code' | 'preview'>('preview')
+    const [projectName, setProjectName] = useState("codegenesis-project")
 
     // Load project if ID exists
     useEffect(() => {
@@ -54,37 +58,100 @@ export default function EditorPage() {
 
         const loadProject = async () => {
             try {
+                console.log(`Loading project: ${projectId}`)
                 const response = await fetch(`/api/projects/${projectId}`)
-                if (!response.ok) throw new Error("Failed to load project")
 
-                const data = await response.json()
-
-                // Restore code
-                if (data.files && data.files["index.html"]) {
-                    setCode(data.files["index.html"].content)
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || `Failed to load project (${response.status})`);
                 }
 
-                // Restore chat history
+                const data = await response.json()
+                console.log('Project data loaded:', data)
+
+                // Set project name
+                if (data.name) {
+                    setProjectName(data.name)
+                }
+
+                // Restore code from project files
+                if (data.files && data.files["index.html"]) {
+                    const loadedCode = data.files["index.html"].content
+                    setCode(loadedCode)
+                    setLastSavedCode(loadedCode)
+                    console.log('Code restored from project files')
+                }
+
+                // Restore chat history from generations
                 if (data.generations && data.generations.length > 0) {
                     const history: Message[] = []
-                    // Add initial greeting
-                    history.push({ role: 'assistant', content: 'Hello! I am CodeGenesis. Describe what you want to build, and I will architect and code it for you.' })
+                    history.push({
+                        role: 'assistant',
+                        content: 'Hello! I am CodeGenesis. Describe what you want to build, and I will architect and code it for you.'
+                    })
 
                     data.generations.forEach((gen: any) => {
                         history.push({ role: 'user', content: gen.prompt })
-                        history.push({ role: 'assistant', content: gen.response || "I've updated the code." })
+                        const aiResponse = gen.response || "I've updated the code based on your request."
+                        history.push({ role: 'assistant', content: aiResponse })
                     })
+
                     setMessages(history)
                 }
+
+                toast.success("Project loaded", {
+                    description: `Loaded "${data.name}"`
+                })
             } catch (error: any) {
                 console.error("Error loading project:", error)
-                toast.error("Failed to load project", {
-                    description: error.message || "Could not fetch project details"
-                })
+                if (error.message.includes("Project not found") || error.message.includes("404")) {
+                    router.push("/dashboard")
+                    return
+                }
+                toast.error("Failed to load project")
             }
         }
         loadProject()
-    }, [projectId])
+    }, [projectId, router])
+
+    // Auto-save every 10 seconds
+    useEffect(() => {
+        if (!projectId) return
+
+        const saveInterval = setInterval(async () => {
+            if (code !== lastSavedCode && !isSaving) {
+                await saveProject()
+            }
+        }, 10000)
+
+        return () => clearInterval(saveInterval)
+    }, [code, lastSavedCode, projectId, isSaving])
+
+    const saveProject = async () => {
+        if (!projectId) return
+        setIsSaving(true)
+        try {
+            const response = await fetch(`/api/projects/${projectId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    files: {
+                        "index.html": { content: code }
+                    }
+                })
+            })
+
+            if (!response.ok) throw new Error('Failed to save')
+
+            setLastSavedCode(code)
+            toast.success("Project saved", { duration: 1000 })
+        } catch (error) {
+            console.error("Auto-save failed:", error)
+            toast.error("Failed to auto-save")
+        } finally {
+            setIsSaving(false)
+        }
+    }
 
     const handleSend = async (customPrompt?: string) => {
         const promptToSend = customPrompt || input
@@ -135,6 +202,19 @@ export default function EditorPage() {
             const aiMessage = { role: 'assistant' as const, content: "I've updated the code based on your request." }
             setMessages(prev => [...prev, aiMessage])
             setCode(data.code)
+
+            // Trigger immediate save after generation
+            if (projectId) {
+                await fetch(`/api/projects/${projectId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        files: { "index.html": { content: data.code } }
+                    })
+                })
+                setLastSavedCode(data.code)
+            }
+
             toast.success("Generation Complete!", {
                 description: "Your application has been updated.",
             })
@@ -142,9 +222,9 @@ export default function EditorPage() {
             // Play sound
             const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3')
             audio.volume = 0.5
-            audio.play().catch(() => { }) // Ignore auto-play errors
+            audio.play().catch(() => { })
 
-            // Save generation if in project mode
+            // Save generation history
             if (projectId) {
                 await fetch(`/api/projects/${projectId}/generations`, {
                     method: 'POST',
@@ -175,7 +255,8 @@ export default function EditorPage() {
 
     const handleDownload = async () => {
         try {
-            await downloadProjectAsZip("codegenesis-project", [
+            const safeName = projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+            await downloadProjectAsZip(safeName, [
                 { name: "index.html", content: code }
             ])
             toast.success("Project Downloaded", {
@@ -188,6 +269,14 @@ export default function EditorPage() {
         }
     }
 
+    const handleShare = () => {
+        const url = window.location.href
+        navigator.clipboard.writeText(url)
+        toast.success("Link Copied", {
+            description: "Project link copied to clipboard."
+        })
+    }
+
     return (
         <div className="h-[calc(100vh-8rem)] flex flex-col">
             {/* Toolbar */}
@@ -196,8 +285,9 @@ export default function EditorPage() {
                     <div className="p-2 bg-primary/10 rounded-md">
                         <Sparkles className="h-5 w-5 text-primary" />
                     </div>
-                    <span className="font-semibold">New Project</span>
+                    <span className="font-semibold">{projectName}</span>
                     <span className="text-xs text-muted-foreground px-2 py-0.5 bg-white/5 rounded-full">Beta</span>
+                    {isSaving && <span className="text-xs text-muted-foreground animate-pulse">Saving...</span>}
                 </div>
                 <div className="flex items-center gap-2">
                     <Button variant="ghost" size="sm" className="gap-2" onClick={() => setActiveTab(activeTab === 'code' ? 'preview' : 'code')}>
@@ -212,7 +302,7 @@ export default function EditorPage() {
                         <Download className="h-4 w-4" />
                         Download ZIP
                     </Button>
-                    <Button size="sm" className="gap-2 bg-primary hover:bg-primary/90">
+                    <Button size="sm" className="gap-2 bg-primary hover:bg-primary/90" onClick={handleShare}>
                         <Share2 className="h-4 w-4" />
                         Share
                     </Button>
@@ -225,7 +315,7 @@ export default function EditorPage() {
                     <div className="flex flex-col h-full bg-black/20">
                         <div className="p-3 border-b border-white/10 font-medium text-sm flex justify-between items-center">
                             <span>AI Architect</span>
-                            <Button variant="ghost" size="icon" className="h-6 w-6">
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setMessages([])}>
                                 <RefreshCw className="h-3 w-3" />
                             </Button>
                         </div>
@@ -290,14 +380,14 @@ export default function EditorPage() {
                                         <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50" />
                                     </div>
                                     <div className="flex-1 text-center bg-black/20 rounded py-0.5 px-2 mx-4 truncate">
-                                        localhost:3000/preview
+                                        Live Preview
                                     </div>
                                 </div>
                                 <iframe
                                     srcDoc={code}
                                     className="flex-1 w-full bg-white"
                                     title="Preview"
-                                    sandbox="allow-scripts"
+                                    sandbox="allow-scripts allow-same-origin allow-modals"
                                 />
                             </div>
                         ) : (

@@ -3,7 +3,8 @@
 import { Bell, Search, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { UserButton, useUser } from '@clerk/nextjs';
+import { UserButton, useUser, ClerkLoaded, SignedIn } from '@clerk/nextjs';
+import ClientUserButton from '@/components/ClientUserButton';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useState } from 'react';
@@ -37,12 +38,14 @@ export function Header() {
                 </div>
             </div>
             <div className="flex items-center gap-4" suppressHydrationWarning>
-                {user && (
-                    <div className="hidden md:flex flex-col items-end" suppressHydrationWarning>
-                        <span className="text-sm font-medium">{user.fullName || user.firstName}</span>
-                        <span className="text-xs text-muted-foreground">{user.primaryEmailAddress?.emailAddress}</span>
-                    </div>
-                )}
+                <ClerkLoaded>
+                    <SignedIn>
+                        <div className="hidden md:flex flex-col items-end">
+                            <span className="text-sm font-medium">{user?.fullName || user?.firstName}</span>
+                            <span className="text-xs text-muted-foreground">{user?.primaryEmailAddress?.emailAddress}</span>
+                        </div>
+                    </SignedIn>
+                </ClerkLoaded>
 
                 <Popover>
                     <PopoverTrigger asChild>
@@ -89,15 +92,7 @@ export function Header() {
                 </Popover>
 
                 <div suppressHydrationWarning>
-                    <UserButton
-                        appearance={{
-                            elements: {
-                                avatarBox: 'h-9 w-9 ring-2 ring-white/10 hover:ring-primary/50 transition-all',
-                                userButtonPopoverCard: 'bg-[#09090b] border border-white/10',
-                                userButtonPopoverFooter: 'hidden',
-                            },
-                        }}
-                    />
+                    <ClientUserButton />
                 </div>
             </div>
         </header>

@@ -10,6 +10,21 @@ export async function GET() {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
+        // AUTO-DELETE: Delete projects older than 15 days
+        const fifteenDaysAgo = new Date();
+        fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 15);
+
+        const { error: deleteError } = await supabaseAdmin
+            .from('projects')
+            .delete()
+            .lt('created_at', fifteenDaysAgo.toISOString())
+            .eq('user_id', userId); // Only delete user's own old projects for safety
+
+        if (deleteError) {
+            console.error('Error cleaning up old projects:', deleteError);
+            // Continue execution, don't block fetching
+        }
+
         const { data: projects, error } = await supabaseAdmin
             .from('projects')
             .select('*')
@@ -42,6 +57,23 @@ export async function POST(req: Request) {
 
         if (!userId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        // LIMIT CHECK: Max 5 projects
+        const { count, error: countError } = await supabaseAdmin
+            .from('projects')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', userId);
+
+        if (countError) {
+            console.error('Error checking project count:', countError);
+            return NextResponse.json({ error: 'Failed to verify project limits' }, { status: 500 });
+        }
+
+        if (count !== null && count >= 5) {
+            return NextResponse.json({
+                error: 'Project limit reached. You can only have a maximum of 5 projects. Please delete an existing project to create a new one.'
+            }, { status: 403 });
         }
 
         const body = await req.json();

@@ -43,7 +43,7 @@ export default function RootLayout({
         },
       }}
     >
-      <html lang="en" className="dark" suppressHydrationWarning>
+      <html lang="en" className="dark" suppressHydrationWarning data-scroll-behavior="smooth">
         <body className={`${inter.className} min-h-screen bg-background text-foreground antialiased`} suppressHydrationWarning>
           {children}
           <DevelopmentPopup />

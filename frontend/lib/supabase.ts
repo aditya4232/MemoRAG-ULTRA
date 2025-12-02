@@ -119,10 +119,24 @@ export const deleteProject = async (projectId: string): Promise<boolean> => {
         const response = await fetch(`/api/projects/${projectId}`, {
             method: 'DELETE',
         });
-        if (!response.ok) throw new Error('Failed to delete project');
+
+        if (!response.ok) {
+            // If 404, the project is already gone, so consider it a success
+            if (response.status === 404) {
+                console.log('Project already deleted (404)');
+                return true;
+            }
+
+            const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+            console.error('Delete project error:', errorData);
+            throw new Error(errorData.details || errorData.error || 'Failed to delete project');
+        }
+
+        const data = await response.json();
+        console.log('Project deleted successfully:', data);
         return true;
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error deleting project:', error);
-        return false;
+        throw error; // Re-throw to let the caller handle it
     }
 };

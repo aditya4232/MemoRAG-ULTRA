@@ -2,6 +2,8 @@
 
 > **Text-to-App Platform** | Build applications at the speed of thought
 
+![CodeGenesis Banner](https://via.placeholder.com/1200x400?text=CodeGenesis+AI+Architect)
+
 CodeGenesis is a production-ready, open-source platform that uses a multi-agent AI swarm to autonomously plan, code, test, and deploy full-stack applications from natural language descriptions.
 
 ## 🌟 Features
@@ -11,7 +13,7 @@ CodeGenesis is a production-ready, open-source platform that uses a multi-agent 
   - **Architect Agent**: Plans file structure and tech stack
   - **Engineer Agent**: Writes code for each file
   - **TestSprite Agent**: Generates Playwright tests automatically
-- **OpenLovable Editor**: Click-to-edit visual interface (Coming Soon)
+- **OpenLovable Editor**: Click-to-edit visual interface
 - **Live Preview**: See your app running in real-time
 - **Production Ready**: Clerk authentication, Supabase data collection, Admin dashboard
 
@@ -28,7 +30,7 @@ CodeGenesis is a production-ready, open-source platform that uses a multi-agent 
 #### 1. Clone the Repository
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/yourusername/CodeGenesis.git
 cd CodeGenesis
 ```
 
@@ -112,56 +114,53 @@ CodeGenesis/
 │   ├── orchestrator.py # LangGraph Workflow
 │   ├── vfs.py         # Virtual File System
 │   └── main.py        # API Endpoints
+└── docs/              # Documentation and Guides
 ```
-
-## 🔑 API Keys Setup
-
-### Gemini API (Free)
-
-1. Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Create a new API key
-3. Add to `backend/.env`
-
-### Clerk (Free)
-
-1. Sign up at [Clerk.com](https://clerk.com)
-2. Create a new application
-3. Copy keys to `frontend/.env.local`
-
-### Supabase (Free)
-
-1. Create project at [Supabase.com](https://supabase.com)
-2. Get URL and anon key from Settings > API
-3. Add to `backend/.env`
 
 ## 🚢 Deployment
 
-### Frontend (Vercel)
+### Vercel (Frontend)
 
-```bash
-cd frontend
-vercel deploy
-```
+CodeGenesis is optimized for deployment on Vercel.
 
-### Backend (Render)
+1.  **Push to GitHub**: Push your code to a GitHub repository.
+2.  **Import to Vercel**: Go to [Vercel](https://vercel.com) and import your repository.
+3.  **Environment Variables**: Add the following environment variables in Vercel project settings:
+    *   `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
+    *   `CLERK_SECRET_KEY`
+    *   `NEXT_PUBLIC_CLERK_SIGN_IN_URL`
+    *   `NEXT_PUBLIC_CLERK_SIGN_UP_URL`
+    *   `NEXT_PUBLIC_API_URL` (URL of your deployed backend)
+4.  **Deploy**: Click "Deploy".
 
-1. Create a new Web Service on [Render](https://render.com)
-2. Connect your GitHub repository
-3. Set build command: `pip install -r requirements.txt`
-4. Set start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
-5. Add environment variables from `.env`
+**Note for Development Deployment:**
+If you are deploying a development branch or preview, ensure your Clerk keys are for the correct environment (Development vs Production).
+
+### Render (Backend)
+
+1.  Create a new Web Service on [Render](https://render.com).
+2.  Connect your GitHub repository.
+3.  Set **Build Command**: `pip install -r requirements.txt`
+4.  Set **Start Command**: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+5.  Add environment variables from `.env`.
 
 ## 🤝 Contributing
 
-This is an open-source project. Contributions are welcome!
+We welcome contributions! Please see `CONTRIBUTING.md` (coming soon) for details.
+
+1.  Fork the repo
+2.  Create your feature branch (`git checkout -b feature/amazing-feature`)
+3.  Commit your changes (`git commit -m 'Add some amazing feature'`)
+4.  Push to the branch (`git push origin feature/amazing-feature`)
+5.  Open a Pull Request
 
 ## 📄 License
 
-MIT License - Free to use for personal and commercial projects
+MIT License - Free to use for personal and commercial projects.
 
 ## 🎓 Built For
 
-Final Year CSE Project 2025 - Showcasing cutting-edge AI agent orchestration
+Final Year CSE Project 2025 - Showcasing cutting-edge AI agent orchestration.
 
 ---
 
