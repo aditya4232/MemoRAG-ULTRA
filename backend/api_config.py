@@ -121,6 +121,16 @@ class APIConfigManager:
                 temperature=temperature
             )
         
+        elif provider == "openrouter":
+            # OpenRouter
+            return ChatOpenAI(
+                model="anthropic/claude-3.5-sonnet", # Default, can be overridden
+                openai_api_key=api_key,
+                openai_api_base="https://openrouter.ai/api/v1",
+                temperature=temperature,
+                default_headers={"HTTP-Referer": "https://codegenesis.app", "X-Title": "CodeGenesis"}
+            )
+        
         elif provider == "a4f":
             # User's own A4F key
             return ChatOpenAI(
@@ -134,19 +144,21 @@ class APIConfigManager:
             raise ValueError(f"Unsupported provider: {provider}")
 
     
-    def validate_user_api_key(self, api_key: str, provider: str) -> bool:
+    def validate_user_api_key(self, api_key: str, provider: str, base_url: Optional[str] = None) -> bool:
         """
         Validate user's API key by making a test call.
         
         Args:
             api_key: User's API key
             provider: Provider name
+            base_url: Custom base URL (optional)
             
         Returns:
             True if valid, False otherwise
         """
         try:
-            llm = self._get_user_llm(api_key, provider, 0.1)
+            # Fix: Pass None for base_url if not provided, and pass temperature as keyword arg
+            llm = self._get_user_llm(api_key, provider, base_url, temperature=0.1)
             # Make a simple test call
             response = llm.invoke("Say 'OK'")
             return True

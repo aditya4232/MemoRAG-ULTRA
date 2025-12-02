@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
-import { ArrowRight, Code2, Cpu, Zap, Globe, Shield, Star, Users, Rocket, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, Code2, Cpu, Zap, Globe, Shield, Star, Users, Rocket, CheckCircle2, Linkedin, Github } from 'lucide-react';
 import Link from 'next/link';
 import { Spotlight } from '@/components/ui/spotlight';
 
@@ -197,6 +197,112 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* How it Works */}
+        <section id="how-it-works" className="py-24 relative z-10">
+          <div className="container mx-auto px-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mb-16"
+            >
+              <h2 className="text-3xl font-bold md:text-4xl mb-4">How it Works</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                From idea to deployment in three simple steps.
+              </p>
+            </motion.div>
+
+            <div className="relative max-w-5xl mx-auto">
+              {/* UI Mockup */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                className="rounded-xl border border-white/10 bg-black/50 backdrop-blur-xl overflow-hidden shadow-2xl shadow-primary/10"
+              >
+                {/* Browser Header */}
+                <div className="h-10 border-b border-white/10 bg-white/5 flex items-center px-4 gap-2">
+                  <div className="flex gap-1.5">
+                    <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50" />
+                    <div className="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50" />
+                    <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50" />
+                  </div>
+                  <div className="flex-1 text-center text-xs text-muted-foreground font-mono">
+                    dashboard.codegenesis.ai
+                  </div>
+                </div>
+
+                {/* App Interface */}
+                <div className="flex h-[500px]">
+                  {/* Sidebar */}
+                  <div className="w-64 border-r border-white/10 bg-white/5 p-4 hidden md:block">
+                    <div className="space-y-4">
+                      <div className="h-8 w-3/4 bg-white/10 rounded animate-pulse" />
+                      <div className="space-y-2">
+                        <div className="h-4 w-full bg-white/5 rounded" />
+                        <div className="h-4 w-5/6 bg-white/5 rounded" />
+                        <div className="h-4 w-4/6 bg-white/5 rounded" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Main Content */}
+                  <div className="flex-1 flex flex-col">
+                    <div className="flex-1 p-8 flex items-center justify-center bg-black/20">
+                      <div className="max-w-md w-full space-y-6">
+                        <div className="space-y-2 text-center">
+                          <div className="inline-block p-3 rounded-full bg-primary/10 mb-2">
+                            <Sparkles className="h-6 w-6 text-primary" />
+                          </div>
+                          <h3 className="text-xl font-semibold">Describe your dream app</h3>
+                          <p className="text-sm text-muted-foreground">
+                            "Create a modern project management dashboard with drag-and-drop tasks and team collaboration."
+                          </p>
+                        </div>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                            <Sparkles className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                          <input
+                            type="text"
+                            disabled
+                            className="w-full bg-white/5 border border-white/10 rounded-lg py-3 pl-10 pr-4 text-sm text-muted-foreground"
+                            value="Create a modern project management dashboard..."
+                          />
+                          <div className="absolute inset-y-0 right-2 flex items-center">
+                            <div className="h-6 w-6 bg-primary rounded flex items-center justify-center">
+                              <ArrowRight className="h-3 w-3 text-white" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Code Preview */}
+                    <div className="h-1/3 border-t border-white/10 bg-[#1e1e1e] p-4 font-mono text-xs overflow-hidden opacity-50">
+                      <div className="text-blue-400">import</div> <div className="text-white inline">React</div> <div className="text-blue-400 inline">from</div> <div className="text-orange-300 inline">'react'</div>;
+                      <br />
+                      <div className="text-purple-400">export default function</div> <div className="text-yellow-300 inline">Dashboard</div>() {'{'}
+                      <br />
+                      &nbsp;&nbsp;<div className="text-purple-400 inline">return</div> (
+                      <br />
+                      &nbsp;&nbsp;&nbsp;&nbsp;&lt;<div className="text-green-400 inline">div</div> <div className="text-blue-300 inline">className</div>=<div className="text-orange-300 inline">"p-6 bg-slate-900"</div>&gt;
+                      <br />
+                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;<div className="text-green-400 inline">h1</div>&gt;Project Dashboard&lt;/<div className="text-green-400 inline">h1</div>&gt;
+                      <br />
+                      &nbsp;&nbsp;&nbsp;&nbsp;&lt;/<div className="text-green-400 inline">div</div>&gt;
+                      <br />
+                      &nbsp;&nbsp;)
+                      <br />
+                      {'}'}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </section>
+
         {/* Meet the Makers */}
         <section className="py-24 bg-black/50 relative z-10">
           <div className="container mx-auto px-4">
@@ -215,13 +321,15 @@ export default function LandingPage() {
             <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
               <MakerCard
                 name="Aditya Shenvi"
-                role="Lead Developer & Architect"
+                role="Cloud, Fullstack & AI Engineer Aspirant"
+                description="Final Year CSE Student looking for full-time opportunities. Passionate about building scalable AI systems."
                 linkedin="https://www.linkedin.com/in/adityashenvi/"
                 github="https://github.com/aditya4232"
               />
               <MakerCard
                 name="Sneha Sah"
-                role="Frontend Engineer & UI/UX"
+                role="Cyber Security Tech"
+                description="Open for opportunities. Dedicated to securing digital infrastructure and building robust applications."
                 linkedin="https://www.linkedin.com/in/sneha-sah-760b40250/"
                 github="https://github.com/amyy45"
               />
@@ -299,6 +407,41 @@ function EarlyAdopterCard({ icon, title, description }: { icon: React.ReactNode,
   );
 }
 
+
+function MakerCard({ name, role, description, linkedin, github }: { name: string, role: string, description?: string, linkedin: string, github?: string }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      whileHover={{ y: -5 }}
+      className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-primary/50 transition-all duration-300 flex items-start gap-4"
+    >
+      <div className="h-16 w-16 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center text-2xl font-bold text-white shrink-0">
+        {name.charAt(0)}
+      </div>
+      <div>
+        <h3 className="text-xl font-semibold text-white">{name}</h3>
+        <p className="text-primary text-sm mb-2">{role}</p>
+        {description && (
+          <p className="text-sm text-muted-foreground mb-4">{description}</p>
+        )}
+        <div className="flex gap-3">
+          {linkedin && (
+            <Link href={linkedin} target="_blank" className="text-muted-foreground hover:text-white transition-colors">
+              <Linkedin className="h-5 w-5" />
+            </Link>
+          )}
+          {github && (
+            <Link href={github} target="_blank" className="text-muted-foreground hover:text-white transition-colors">
+              <Github className="h-5 w-5" />
+            </Link>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 
 function Sparkles({ className }: { className?: string }) {
   return (

@@ -8,10 +8,10 @@ export default function DashboardLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className="flex min-h-screen">
+        <div className="flex min-h-screen" suppressHydrationWarning>
             <Sidebar />
-            <div className="flex-1 pl-64 transition-all duration-300">
-                <div className="bg-yellow-500/10 border-b border-yellow-500/20 px-4 py-1 text-center text-xs font-medium text-yellow-500">
+            <div className="flex-1 pl-64 transition-all duration-300" suppressHydrationWarning>
+                <div className="bg-yellow-500/10 border-b border-yellow-500/20 px-4 py-1 text-center text-xs font-medium text-yellow-500" suppressHydrationWarning>
                     🚧 CodeGenesis Beta v0.45 - Under Active Development by Aditya Shenvi & Sneha Sah 🚧
                 </div>
                 <Header />

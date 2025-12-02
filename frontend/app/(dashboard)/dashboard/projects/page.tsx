@@ -40,7 +40,7 @@ export default function ProjectsPage() {
     )
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-8" suppressHydrationWarning>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Projects</h1>
@@ -95,44 +95,46 @@ export default function ProjectsPage() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.05 }}
                         >
-                            <Card className="bg-black/40 border-white/10 hover:border-primary/50 transition-all group h-full flex flex-col">
-                                <CardHeader>
-                                    <div className="flex justify-between items-start">
-                                        <div className="space-y-1">
-                                            <CardTitle className="text-xl group-hover:text-primary transition-colors">
-                                                {project.name}
-                                            </CardTitle>
-                                            <CardDescription className="line-clamp-2">
-                                                {project.description || "No description provided."}
-                                            </CardDescription>
+                            <Link href={`/dashboard/editor?id=${project.id}`} className="block h-full">
+                                <Card className="bg-black/40 border-white/10 hover:border-primary/50 transition-all group h-full flex flex-col">
+                                    <CardHeader>
+                                        <div className="flex justify-between items-start">
+                                            <div className="space-y-1">
+                                                <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                                                    {project.name}
+                                                </CardTitle>
+                                                <CardDescription className="line-clamp-2">
+                                                    {project.description || "No description provided."}
+                                                </CardDescription>
+                                            </div>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2">
+                                                <MoreVertical className="h-4 w-4" />
+                                            </Button>
                                         </div>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2">
-                                            <MoreVertical className="h-4 w-4" />
-                                        </Button>
-                                    </div>
-                                </CardHeader>
-                                <CardContent className="flex-1">
-                                    <div className="flex flex-wrap gap-2">
-                                        {project.tech_stack?.map((tech) => (
-                                            <span key={tech} className="px-2 py-1 rounded-md bg-white/5 text-xs font-medium text-muted-foreground border border-white/5">
-                                                {tech}
-                                            </span>
-                                        ))}
-                                        {(!project.tech_stack || project.tech_stack.length === 0) && (
-                                            <span className="px-2 py-1 rounded-md bg-white/5 text-xs font-medium text-muted-foreground border border-white/5">
-                                                HTML/CSS
-                                            </span>
-                                        )}
-                                    </div>
-                                </CardContent>
-                                <CardFooter className="border-t border-white/5 pt-4 flex justify-between text-xs text-muted-foreground">
-                                    <span>Updated {new Date(project.updated_at).toLocaleDateString()}</span>
-                                    <div className="flex gap-2">
-                                        {project.repository_url && <Github className="h-4 w-4 hover:text-white cursor-pointer" />}
-                                        {project.deployment_url && <Globe className="h-4 w-4 hover:text-white cursor-pointer" />}
-                                    </div>
-                                </CardFooter>
-                            </Card>
+                                    </CardHeader>
+                                    <CardContent className="flex-1">
+                                        <div className="flex flex-wrap gap-2">
+                                            {project.tech_stack?.map((tech) => (
+                                                <span key={tech} className="px-2 py-1 rounded-md bg-white/5 text-xs font-medium text-muted-foreground border border-white/5">
+                                                    {tech}
+                                                </span>
+                                            ))}
+                                            {(!project.tech_stack || project.tech_stack.length === 0) && (
+                                                <span className="px-2 py-1 rounded-md bg-white/5 text-xs font-medium text-muted-foreground border border-white/5">
+                                                    HTML/CSS
+                                                </span>
+                                            )}
+                                        </div>
+                                    </CardContent>
+                                    <CardFooter className="border-t border-white/5 pt-4 flex justify-between text-xs text-muted-foreground">
+                                        <span>Updated {new Date(project.updated_at).toLocaleDateString()}</span>
+                                        <div className="flex gap-2">
+                                            {project.repository_url && <Github className="h-4 w-4 hover:text-white cursor-pointer" />}
+                                            {project.deployment_url && <Globe className="h-4 w-4 hover:text-white cursor-pointer" />}
+                                        </div>
+                                    </CardFooter>
+                                </Card>
+                            </Link>
                         </motion.div>
                     ))}
                 </div>

@@ -40,6 +40,7 @@ export function NewProjectModal({ open, onOpenChange }: { open: boolean, onOpenC
             const fullDescription = `Type: ${formData.type}\nTech Stack: ${formData.techStack}\n\nRequirements:\n${formData.requirements}\n\nDescription:\n${formData.description}`
 
             const project = await createProject({
+                id: undefined, // Let DB generate ID
                 user_id: user.id,
                 name: formData.name,
                 description: fullDescription,

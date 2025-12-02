@@ -51,10 +51,39 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Name is required' }, { status: 400 });
         }
 
-        // Ensure profile exists (optional, but good practice)
-        // We could check if profile exists, if not create it.
-        // For now, we assume profile creation is handled by webhook or lazy creation.
-        // Let's try to insert project.
+        // Ensure profile exists
+        const { data: profile } = await supabaseAdmin
+            .from('profiles')
+            .select('id')
+            .eq('id', userId)
+            .single();
+
+        if (!profile) {
+            // Fetch user details from Clerk to create profile
+            const { currentUser } = await import('@clerk/nextjs/server');
+            const user = await currentUser();
+
+            if (user) {
+                const { error: profileError } = await supabaseAdmin
+                    .from('profiles')
+                    .insert([
+                        {
+                            id: userId,
+                            email: user.emailAddresses[0]?.emailAddress,
+                            full_name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+                            avatar_url: user.imageUrl
+                        }
+                    ]);
+
+                if (profileError) {
+                    console.error('Error creating user profile:', profileError);
+                    return NextResponse.json({
+                        error: 'Failed to create user profile',
+                        details: profileError.message
+                    }, { status: 500 });
+                }
+            }
+        }
 
         const { data: project, error } = await supabaseAdmin
             .from('projects')

@@ -44,7 +44,7 @@ export default function RootLayout({
       }}
     >
       <html lang="en" className="dark" suppressHydrationWarning>
-        <body className={`${inter.className} min-h-screen bg-background text-foreground antialiased`}>
+        <body className={`${inter.className} min-h-screen bg-background text-foreground antialiased`} suppressHydrationWarning>
           {children}
           <DevelopmentPopup />
           <ToastProvider />

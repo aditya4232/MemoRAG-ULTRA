@@ -33,10 +33,15 @@ export function Footer() {
 
                     <div>
                         <h4 className="font-semibold mb-4">Developers</h4>
-                        <ul className="space-y-4 text-sm text-muted-foreground">
+                        <ul className="space-y-6 text-sm text-muted-foreground">
                             <li className="flex flex-col gap-1">
                                 <span className="font-medium text-foreground">Aditya Shenvi</span>
-                                <div className="flex gap-3">
+                                <p className="text-xs leading-relaxed">
+                                    Cloud, Fullstack & AI Engineer Aspirant.<br />
+                                    Final Year CSE Student.<br />
+                                    Looking for full-time opportunities.
+                                </p>
+                                <div className="flex gap-3 mt-1">
                                     <Link href="https://www.linkedin.com/in/adityashenvi/" target="_blank" className="hover:text-blue-500 transition-colors">
                                         <Linkedin className="h-4 w-4" />
                                     </Link>
@@ -47,7 +52,11 @@ export function Footer() {
                             </li>
                             <li className="flex flex-col gap-1">
                                 <span className="font-medium text-foreground">Sneha Sah</span>
-                                <div className="flex gap-3">
+                                <p className="text-xs leading-relaxed">
+                                    Cyber Security Tech.<br />
+                                    Open for opportunities.
+                                </p>
+                                <div className="flex gap-3 mt-1">
                                     <Link href="https://www.linkedin.com/in/sneha-sah-760b40250/" target="_blank" className="hover:text-blue-500 transition-colors">
                                         <Linkedin className="h-4 w-4" />
                                     </Link>

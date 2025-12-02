@@ -55,7 +55,6 @@ export function Navbar() {
                                     avatarBox: 'h-9 w-9',
                                 },
                             }}
-                            afterSignOutUrl="/"
                         />
                     </SignedIn>
                 </div>

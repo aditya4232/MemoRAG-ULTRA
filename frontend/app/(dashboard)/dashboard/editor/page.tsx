@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Send, Download, Play, Code2, Eye, Share2, Sparkles, RefreshCw } from "lucide-react"
 import { toast } from "sonner"
 import { downloadProjectAsZip } from "@/lib/zip-utils"
+import { useSearchParams, useRouter } from "next/navigation"
+import { supabase } from "@/lib/supabase"
 
 interface Message {
     role: 'user' | 'assistant'
@@ -15,6 +17,10 @@ interface Message {
 }
 
 export default function EditorPage() {
+    const searchParams = useSearchParams()
+    const router = useRouter()
+    const projectId = searchParams.get("id")
+
     const [messages, setMessages] = useState<Message[]>([
         { role: 'assistant', content: 'Hello! I am CodeGenesis. Describe what you want to build, and I will architect and code it for you.' }
     ])
@@ -41,6 +47,44 @@ export default function EditorPage() {
 </html>
   `)
     const [activeTab, setActiveTab] = useState<'code' | 'preview'>('preview')
+
+    // Load project if ID exists
+    useEffect(() => {
+        if (!projectId) return
+
+        const loadProject = async () => {
+            try {
+                const response = await fetch(`/api/projects/${projectId}`)
+                if (!response.ok) throw new Error("Failed to load project")
+
+                const data = await response.json()
+
+                // Restore code
+                if (data.files && data.files["index.html"]) {
+                    setCode(data.files["index.html"].content)
+                }
+
+                // Restore chat history
+                if (data.generations && data.generations.length > 0) {
+                    const history: Message[] = []
+                    // Add initial greeting
+                    history.push({ role: 'assistant', content: 'Hello! I am CodeGenesis. Describe what you want to build, and I will architect and code it for you.' })
+
+                    data.generations.forEach((gen: any) => {
+                        history.push({ role: 'user', content: gen.prompt })
+                        history.push({ role: 'assistant', content: gen.response || "I've updated the code." })
+                    })
+                    setMessages(history)
+                }
+            } catch (error: any) {
+                console.error("Error loading project:", error)
+                toast.error("Failed to load project", {
+                    description: error.message || "Could not fetch project details"
+                })
+            }
+        }
+        loadProject()
+    }, [projectId])
 
     const handleSend = async (customPrompt?: string) => {
         const promptToSend = customPrompt || input
@@ -99,6 +143,21 @@ export default function EditorPage() {
             const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3')
             audio.volume = 0.5
             audio.play().catch(() => { }) // Ignore auto-play errors
+
+            // Save generation if in project mode
+            if (projectId) {
+                await fetch(`/api/projects/${projectId}/generations`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        prompt: promptToSend,
+                        response: "I've updated the code based on your request.",
+                        code: data.code,
+                        model: keys.anthropic ? 'claude-3-5-sonnet' : 'gpt-4o',
+                        provider: keys.anthropic ? 'anthropic' : 'openai'
+                    })
+                })
+            }
 
         } catch (error: any) {
             toast.error("Generation Failed", {

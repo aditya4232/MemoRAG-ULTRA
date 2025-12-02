@@ -24,20 +24,21 @@ export function Header() {
     };
 
     return (
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border bg-background/50 px-6 backdrop-blur-xl">
-            <div className="flex flex-1 items-center gap-4">
-                <div className="relative w-full max-w-md">
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border bg-background/50 px-6 backdrop-blur-xl" suppressHydrationWarning>
+            <div className="flex flex-1 items-center gap-4" suppressHydrationWarning>
+                <div className="relative w-full max-w-md" suppressHydrationWarning>
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
                         type="search"
                         placeholder="Search projects..."
                         className="w-full bg-background/50 pl-9 md:w-[300px] lg:w-[400px] border-white/10 focus:border-primary/50"
+                        suppressHydrationWarning
                     />
                 </div>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4" suppressHydrationWarning>
                 {user && (
-                    <div className="hidden md:flex flex-col items-end">
+                    <div className="hidden md:flex flex-col items-end" suppressHydrationWarning>
                         <span className="text-sm font-medium">{user.fullName || user.firstName}</span>
                         <span className="text-xs text-muted-foreground">{user.primaryEmailAddress?.emailAddress}</span>
                     </div>
@@ -45,7 +46,7 @@ export function Header() {
 
                 <Popover>
                     <PopoverTrigger asChild>
-                        <Button variant="ghost" size="icon" className="relative hover:bg-white/10">
+                        <Button variant="ghost" size="icon" className="relative hover:bg-white/10" suppressHydrationWarning>
                             <Bell className="h-5 w-5 text-muted-foreground" />
                             {notifications.some(n => !n.read) && (
                                 <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-primary animate-pulse" />
@@ -87,16 +88,17 @@ export function Header() {
                     </PopoverContent>
                 </Popover>
 
-                <UserButton
-                    appearance={{
-                        elements: {
-                            avatarBox: 'h-9 w-9 ring-2 ring-white/10 hover:ring-primary/50 transition-all',
-                            userButtonPopoverCard: 'bg-[#09090b] border border-white/10',
-                            userButtonPopoverFooter: 'hidden',
-                        },
-                    }}
-                    afterSignOutUrl="/"
-                />
+                <div suppressHydrationWarning>
+                    <UserButton
+                        appearance={{
+                            elements: {
+                                avatarBox: 'h-9 w-9 ring-2 ring-white/10 hover:ring-primary/50 transition-all',
+                                userButtonPopoverCard: 'bg-[#09090b] border border-white/10',
+                                userButtonPopoverFooter: 'hidden',
+                            },
+                        }}
+                    />
+                </div>
             </div>
         </header>
     );

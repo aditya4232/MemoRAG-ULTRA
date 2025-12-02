@@ -8,7 +8,6 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 // Database types
 export interface UserProfile {
     id: string;
-    user_id: string;
     email: string;
     full_name: string;
     avatar_url?: string;
@@ -33,49 +32,44 @@ export interface Project {
 
 // User profile operations
 export const getUserProfile = async (userId: string): Promise<UserProfile | null> => {
-    const { data, error } = await supabase
-        .from('user_profiles')
-        .select('*')
-        .eq('user_id', userId)
-        .single();
-
-    if (error) {
+    try {
+        const response = await fetch('/api/profile');
+        if (!response.ok) throw new Error('Failed to fetch profile');
+        return await response.json();
+    } catch (error) {
         console.error('Error fetching user profile:', error);
         return null;
     }
-
-    return data;
 };
 
 export const createUserProfile = async (profile: Partial<UserProfile>): Promise<UserProfile | null> => {
-    const { data, error } = await supabase
-        .from('user_profiles')
-        .insert([profile])
-        .select()
-        .single();
-
-    if (error) {
+    try {
+        const response = await fetch('/api/profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(profile),
+        });
+        if (!response.ok) throw new Error('Failed to create profile');
+        return await response.json();
+    } catch (error) {
         console.error('Error creating user profile:', error);
         return null;
     }
-
-    return data;
 };
 
 export const updateUserProfile = async (userId: string, updates: Partial<UserProfile>): Promise<UserProfile | null> => {
-    const { data, error } = await supabase
-        .from('user_profiles')
-        .update(updates)
-        .eq('user_id', userId)
-        .select()
-        .single();
-
-    if (error) {
+    try {
+        const response = await fetch('/api/profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updates),
+        });
+        if (!response.ok) throw new Error('Failed to update profile');
+        return await response.json();
+    } catch (error) {
         console.error('Error updating user profile:', error);
         return null;
     }
-
-    return data;
 };
 
 // Project operations
